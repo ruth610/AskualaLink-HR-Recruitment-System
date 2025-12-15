@@ -1,11 +1,11 @@
 require('dotenv').config();
 const express = require('express');
-const authRoutes = require('./modules/auth/auth.routes');
+const installRoute = require('./shared/db/dbConfig');
 
 
 const app = express();
 app.use(express.json());
-app.use('/auth', authRoutes);
+app.use('/install', installRoute);
 
 
 module.exports = app;

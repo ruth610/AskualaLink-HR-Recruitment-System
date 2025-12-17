@@ -35,6 +35,31 @@ async function login(email, password) {
 
 }
 
+async function createUser(userData) {
+    try {
+        const existingUser = await UserModel.findByEmail(userData.email);
+        if (existingUser) {
+            return {
+                status: statusCode.CONFLICT,
+                message: 'User with this email already exists'
+            };
+        }
+        const newUser = await UserModel.create(userData);
+        return {
+            status: statusCode.CREATED,
+            message: 'User created successfully',
+            data: newUser
+        };
+    } catch (error) {
+        console.error('Error in authService createUser:', error);
+        return {
+            status: statusCode.INTERNAL_SERVER_ERROR,
+            message: 'Internal server error'
+        };
+    }
+}
+
 module.exports = {
-    login
+    login,
+    createUser
 }

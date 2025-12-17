@@ -3,11 +3,11 @@ const db = require('../config/db');
 class UserModel{
 
     static async create(userData){
-        const {username, password, email, role} = userData;
+        const {fullName, password, email, role} = userData;
         try {
 
             const query = 'INSERT INTO users (full_name, password, email, role) VALUES ($1, $2, $3, $4) RETURNING *';
-            const values = [username, hashedPassword, email, role];
+            const values = [fullName, password, email, role];
             const result = await db.query(query, values);
             return result.rows[0];
         } catch (error) {

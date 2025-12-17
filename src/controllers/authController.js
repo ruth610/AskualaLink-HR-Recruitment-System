@@ -4,6 +4,35 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
 
+/**
+ * @swagger
+ * tags:
+ *   name: Auth
+ *   description: Authentication & User Management
+ */
+
+/**
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     summary: Login user and get JWT token
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/LoginRequest'
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Invalid credentials
+ */
+
+
 async function login(req,res){
     const { email, password } = req.body;
 
@@ -34,6 +63,29 @@ async function login(req,res){
     }
 
 }
+
+/**
+ * @swagger
+ * /users:
+ *   post:
+ *     summary: Create a new system user (Admin only)
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateUser'
+ *     responses:
+ *       201:
+ *         description: User created successfully
+ *       400:
+ *         description: Validation error
+ *       403:
+ *         description: Forbidden
+ */
 
 async function createUser(req, res){
     try {

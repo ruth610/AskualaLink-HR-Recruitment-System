@@ -1,10 +1,11 @@
 const bcrypt = require('bcrypt');
 const statusCode = require('http-status-codes');
-const UserModel = require('../models/userModel');
+const {User} = require('../models/');
+const { where } = require('sequelize');
 
 async function login(email, password) {
     try {
-        const user = await UserModel.findByEmail(email);
+        const user = await User.findOne({where : { email: email }});
         if (!user) {
             return {
                 status: statusCode.NOT_FOUND,
@@ -37,14 +38,19 @@ async function login(email, password) {
 
 async function createUser(userData) {
     try {
-        const existingUser = await UserModel.findByEmail(userData.email);
+        const existingUser = await User.findOne({where : { email: userData.email }});
         if (existingUser) {
             return {
                 status: statusCode.CONFLICT,
                 message: 'User with this email already exists'
             };
         }
-        const newUser = await UserModel.create(userData);
+        const newUser = await User.create({
+            full_name: userData.full_name,
+            email: userData.email,
+            password_hash: userData.password,
+            role: userData.role
+        });
         return {
             status: statusCode.CREATED,
             message: 'User created successfully',

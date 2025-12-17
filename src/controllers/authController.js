@@ -110,9 +110,9 @@ async function login(req,res){
 
 async function createUser(req, res){
     try {
-        const { fullName, password, email, role } = req.body;
+        const { full_name, password, email, role } = req.body;
         // validate input
-        if (!fullName) {
+        if (!full_name) {
             return res.status(
                 statusCode.BAD_REQUEST).json({
                 message: 'Fullname is required'
@@ -143,7 +143,7 @@ async function createUser(req, res){
         const hashedPassword = await bcrypt.hash(password, salt);
         // call service to create user
         const result = await authService.createUser({
-            fullName,
+            full_name,
             password: hashedPassword,
             email, role
         });

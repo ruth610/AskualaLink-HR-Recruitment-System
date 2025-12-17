@@ -1,4 +1,4 @@
-const db = require('../config/db');
+const db = require('../configs/db');
 
 class UserModel{
 
@@ -6,7 +6,7 @@ class UserModel{
         const {fullName, password, email, role} = userData;
         try {
 
-            const query = 'INSERT INTO users (full_name, password, email, role) VALUES ($1, $2, $3, $4) RETURNING *';
+            const query = 'INSERT INTO users (full_name, password_hash, email, role) VALUES ($1, $2, $3, $4) RETURNING *';
             const values = [fullName, password, email, role];
             const result = await db.query(query, values);
             return result.rows[0];

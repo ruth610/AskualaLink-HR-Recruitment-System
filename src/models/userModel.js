@@ -21,6 +21,19 @@ class UserModel{
         }
 
     }
+
+    static async findByEmail(email){
+        try {
+            const user = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+            if(user.rows.length === 0){
+                return null;
+            }
+            return user.rows[0];
+        } catch (error) {
+            console.log(error);
+            throw new Error('Error finding user by email: ' + error.message);
+        }
+    }
 }
 
 module.exports = UserModel;

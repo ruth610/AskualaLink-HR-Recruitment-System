@@ -1,6 +1,5 @@
 const app = require('./src/app');
-const pool = require('./src/shared/db/db');
-
+const pool = require('./src/configs/db');
 
 app.get('/', async (req, res) => {
   try {

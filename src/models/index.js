@@ -1,11 +1,12 @@
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
-const Sequelize = require('sequelize');
+import fs from 'fs';
+import path from 'path';
+import Sequelize from 'sequelize';
+import config from '../../config/config';
+
 const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || 'development';
-const config = require('../../config/config')[env];
 
 const db = {};
 
@@ -36,7 +37,7 @@ fs.readdirSync(__dirname)
     );
     db[model.name] = model;
   });
-  
+
 
 Object.keys(db).forEach(modelName => {
   if (db[modelName].associate) {

@@ -1,4 +1,4 @@
-const db = require('../configs/db');
+import db from '../configs/db';
 
 class UserModel{
 

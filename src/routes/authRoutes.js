@@ -1,8 +1,9 @@
-const express = require('express');
-const router= express.Router();
-const authController = require('../controllers/authController');
-const authMiddleWare = require('../middlewares/authMiddleware');
-const authorizeRoles = require('../middlewares/role.middleware');
+import  express  from 'express';
+import  authController  from '../controllers/authController';
+import  authMiddleWare  from '../middlewares/authMiddleware';
+import  authorizeRoles  from '../middlewares/role.middleware';
+
+const router = express.Router();
 
 
 /**

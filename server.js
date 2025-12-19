@@ -1,5 +1,5 @@
-const app = require('./src/app');
-const pool = require('./src/configs/db');
+import app from './src/app';
+import pool from './src/configs/db';
 
 app.get('/', async (req, res) => {
   try {

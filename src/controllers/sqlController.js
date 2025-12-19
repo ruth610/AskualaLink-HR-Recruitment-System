@@ -1,5 +1,5 @@
-const sqlService =  require('../services/sqlService');
-const statusCode = require('http-status-codes');
+import sqlService from '../services/sqlService';
+import statusCode from 'http-status-codes';
 
 
 async function install(req, res){

@@ -1,4 +1,4 @@
-const statusCodes = require('http-status-codes');
+import statusCodes from 'http-status-codes';
 
 const authorizeRoles = (...allowedRoles)=>{
     return (req,res,next)=>{

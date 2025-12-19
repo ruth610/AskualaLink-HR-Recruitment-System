@@ -1,6 +1,6 @@
-const bcrypt = require('bcrypt');
-const statusCode = require('http-status-codes');
-const UserModel = require('../models/userModel');
+import bcrypt from 'bcrypt';
+import statusCode  from 'http-status-codes';
+import UserModel  from '../models/userMode';
 
 async function login(email, password) {
     try {

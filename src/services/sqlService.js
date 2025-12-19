@@ -1,5 +1,5 @@
-const db = require('../configs/db');
-const fs = require('fs');
+import db from '../configs/db';
+import fs from 'fs';
 
 async function install(){
     // file path is not the same with the current directory

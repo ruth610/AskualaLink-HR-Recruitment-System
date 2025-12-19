@@ -1,9 +1,9 @@
 require('dotenv').config();
-const express = require('express');
-const swaggerUi = require('swagger-ui-express');
-const swaggerSpec = require('../src/utils/swagger/swagger');
-const sqlRoutes = require('./routes/sqlRoutes');
-const authRoutes = require('./routes/authRoutes');
+import express from 'express';
+import swaggerUi from 'swagger-ui-express';
+import swaggerSpec from '../src/utils/swagger/swagger';
+import sqlRoutes from './routes/sqlRoutes';
+import authRoutes from './routes/authRoutes';
 
 
 const app = express();

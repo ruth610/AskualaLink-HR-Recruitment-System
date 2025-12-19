@@ -1,5 +1,5 @@
-const jwt = require('jsonwebtoken');
-const statusCode = require('http-status-codes');
+import jwt from 'jsonwebtoken';
+import statusCode from 'http-status-codes';
 
 const authMiddleWare = (req,res,next) =>{
     const authHeader = req.headers.authorization;

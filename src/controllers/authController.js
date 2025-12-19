@@ -1,7 +1,7 @@
-const authService = require('../services/authService');
-const statusCode = require('http-status-codes');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+import authService  from  '../services/authService';
+import statusCode  from  'http-status-codes';
+import jwt  from  'jsonwebtoken';
+import bcrypt  from  'bcrypt';
 
 
 /**

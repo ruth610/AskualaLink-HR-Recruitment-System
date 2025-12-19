@@ -1,7 +1,6 @@
-const bcrypt = require('bcrypt');
-const statusCode = require('http-status-codes');
-const {User} = require('../models/');
-const { where } = require('sequelize');
+import bcrypt from 'bcrypt';
+import statusCode  from 'http-status-codes';
+import User  from '../models/user';
 
 async function login(email, password) {
     try {

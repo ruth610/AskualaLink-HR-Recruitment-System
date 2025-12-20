@@ -3,7 +3,7 @@ import Joi from 'joi';
 const createJobSchema = Joi.object({
     title: Joi.string().min(5).max(100).required(),
     department: Joi.string().min(2).max(50).required(),
-    status: Joi.string().valid('OPEN', 'DRAFT', 'CLOSED').default('OPEN'),
+    status: Joi.string().valid('OPEN', 'ARCHIVED', 'CLOSED').default('OPEN'),
     type: Joi.string().valid('FULL_TIME', 'PART_TIME', 'CONTRACT', 'INTERN').required(),
     deadline: Joi.date().greater('now').required().messages({
         'date.greater': 'Deadline must be in the future'

@@ -146,7 +146,8 @@ async function createUser(req, res){
         const result = await authService.createUser({
             full_name,
             password: hashedPassword,
-            email, role
+            email,
+            role
         });
         if (result.status !== statusCode.CREATED) {
             return res.status(

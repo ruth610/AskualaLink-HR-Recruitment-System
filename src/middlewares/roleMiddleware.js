@@ -5,7 +5,7 @@ export  const authorizeRoles = (...allowedRoles)=>{
         if(!req.user){
             return res.status(statusCodes.UNAUTHORIZED).json({ message: 'Unauthorized: No user information found' });
         }
-        userRole = req.user.role
+        const userRole = req.user.role
         if(!allowedRoles.includes(userRole)){
             return res.status(
                 statusCodes.FORBIDDEN).json({

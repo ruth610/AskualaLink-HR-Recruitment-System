@@ -70,3 +70,13 @@ export const deleteJob = async (jobId, userId, userRole) => {
     await job.destroy();
     return { message: "Job deleted successfully." };
 };
+
+export const getJobDetails = async (jobId) => {
+    const job = await Job.findByPk(jobId);
+    if (!job) {
+        const error = new Error("Job not found");
+        error.statusCode = statusCode.NOT_FOUND;
+        throw error;
+    }
+    return job;
+};

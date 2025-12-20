@@ -28,5 +28,11 @@ router.delete(
     recruitmentController.deleteJob
 );
 
+router.get(
+    '/job-details/:id',
+    authMiddleWare,
+    recruitmentController.getJobDetails
+);
+
 
 export { router }

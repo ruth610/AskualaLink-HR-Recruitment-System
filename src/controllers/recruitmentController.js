@@ -106,7 +106,24 @@ async function deleteJob(req, res, next) {
 }
 
 async function getJobDetails(req, res, next) {
-    // Implementation for retrieving job details
+    const jobId = req.params.id;
+    try {
+        const jobDetails = await recruitmentService.getJobDetails(jobId);
+        return res.status(statusCode.OK).json({
+            success: true,
+            data: jobDetails
+        });
+    }
+    catch (error) {
+        console.log(error);
+        if(error.statusCode){
+            return res.status(error.statusCode).json({
+                success: false,
+                message: error.message
+            });
+        }
+        next(error);
+    }
 }
 
 export { createJob, updateJob, deleteJob, getJobDetails };

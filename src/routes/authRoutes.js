@@ -1,7 +1,7 @@
 import  express  from 'express';
-import  authController  from '../controllers/authController';
-import  authMiddleWare  from '../middlewares/authMiddleware';
-import  authorizeRoles  from '../middlewares/role.middleware';
+import  * as authController  from '../controllers/authController.js';
+import  {authMiddleWare}  from '../middlewares/authMiddleware.js';
+import  {authorizeRoles}  from '../middlewares/roleMiddleware.js';
 
 const router = express.Router();
 
@@ -69,4 +69,4 @@ router.post(
     authController.login
 );
 
-module.exports = router;
+export { router };

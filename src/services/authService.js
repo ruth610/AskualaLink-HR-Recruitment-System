@@ -1,6 +1,8 @@
 import bcrypt from 'bcrypt';
 import statusCode  from 'http-status-codes';
-import User  from '../models/user';
+import db  from '../models/index.js';
+
+const { User } = db;
 
 async function login(email, password) {
     try {
@@ -11,12 +13,14 @@ async function login(email, password) {
                 message: 'User not found'
             };
         }
+        const isMatch = await bcrypt.compare(password, user.password_hash);
 
-        const isMatch = await bcrypt.compare(password, user.password);
+        console.log(isMatch);
+        console.log(user.password_hash);
         if (!isMatch) {
             return {
                 status: statusCode.UNAUTHORIZED,
-                message: 'Invalid password'
+                message: 'Wrong password'
             };
         }
         return {
@@ -64,7 +68,7 @@ async function createUser(userData) {
     }
 }
 
-module.exports = {
+export {
     login,
     createUser
 }

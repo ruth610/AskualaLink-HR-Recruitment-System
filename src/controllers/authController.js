@@ -1,4 +1,4 @@
-import authService  from  '../services/authService';
+import * as authService from '../services/authService.js';
 import statusCode  from  'http-status-codes';
 import jwt  from  'jsonwebtoken';
 import bcrypt  from  'bcrypt';
@@ -56,7 +56,7 @@ async function login(req,res){
                 message: result.message
             });
         }
-        payload = {
+        const payload = {
             userId: result.data.id,
             email: result.data.email,
             fullName: result.data.full_name,
@@ -167,7 +167,7 @@ async function createUser(req, res){
     }
 }
 
-module.exports = {
+export {
     login,
     createUser
 }

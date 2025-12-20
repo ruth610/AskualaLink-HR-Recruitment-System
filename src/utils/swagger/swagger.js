@@ -1,5 +1,5 @@
-const swaggerJSDoc = require('swagger-jsdoc');
-const schemas = require('./schemas');
+import swaggerJSDoc from 'swagger-jsdoc';
+import {schemas} from './schemas.js';
 
 const options = {
   definition: {
@@ -38,4 +38,4 @@ const options = {
   ],
 };
 
-module.exports = swaggerJSDoc(options);
+export default swaggerJSDoc(options);

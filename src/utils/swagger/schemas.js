@@ -1,4 +1,4 @@
-module.exports = {
+export const schemas = {
   LoginRequest: {
     type: 'object',
     required: ['email', 'password'],

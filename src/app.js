@@ -1,15 +1,14 @@
-require('dotenv').config();
+import dotenv from 'dotenv';
 import express from 'express';
 import swaggerUi from 'swagger-ui-express';
-import swaggerSpec from '../src/utils/swagger/swagger';
-import sqlRoutes from './routes/sqlRoutes';
-import authRoutes from './routes/authRoutes';
+import swaggerSpec from '../src/utils/swagger/swagger.js';
+import * as authRoutes from './routes/authRoutes.js';
 
+dotenv.config();
 
 const app = express();
 app.use(express.json());
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-app.use('/auth', authRoutes);
-app.use('/sql', sqlRoutes);
+app.use('/auth', authRoutes.router);
 
-module.exports = app;
+export default app;

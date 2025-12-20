@@ -1,6 +1,6 @@
 import statusCodes from 'http-status-codes';
 
-const authorizeRoles = (...allowedRoles)=>{
+export  const authorizeRoles = (...allowedRoles)=>{
     return (req,res,next)=>{
         if(!req.user){
             return res.status(statusCodes.UNAUTHORIZED).json({ message: 'Unauthorized: No user information found' });
@@ -16,4 +16,3 @@ const authorizeRoles = (...allowedRoles)=>{
     };
 };
 
-module.exports = authorizeRoles;

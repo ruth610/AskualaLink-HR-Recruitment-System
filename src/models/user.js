@@ -1,8 +1,15 @@
 'use strict';
 import { Model } from 'sequelize';
 
-module.exports = (sequelize, DataTypes) => {
-  class User extends Model {}
+const User = (sequelize, DataTypes) => {
+  class User extends Model {
+    static associate(models) {
+      User.hasMany(models.Job, {
+        foreignKey: 'created_by',
+        as: 'jobs',
+      });
+    }
+  }
 
   User.init(
     {
@@ -48,3 +55,4 @@ module.exports = (sequelize, DataTypes) => {
 
   return User;
 };
+export default User;

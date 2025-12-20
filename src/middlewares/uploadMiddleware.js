@@ -1,5 +1,4 @@
 import multer  from "multer";
-import path from 'path';
 import fs from 'fs';
 
 
@@ -36,11 +35,13 @@ const fileFilter = (req,file,cb) =>{
     }
 };
 
-const uploads = multer({
+export const uploads = multer({
     storage:storage,
     fileFilter:fileFilter,
     limits: {
         fileSize: 10 * 1024 * 1024
     }
 })
+
+
 

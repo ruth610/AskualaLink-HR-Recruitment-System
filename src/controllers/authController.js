@@ -111,35 +111,7 @@ async function login(req,res){
 async function createUser(req, res){
     try {
         const { full_name, password, email, role } = req.body;
-        // validate input
-        if (!full_name) {
-            return res.status(
-                statusCode.BAD_REQUEST).json({
-                message: 'Fullname is required'
-            });
-        }
-        if (!password) {
-            return res.status(
-                statusCode.BAD_REQUEST).json({
-                message: 'Password is required'
-            });
-        }
-        emailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!email || !emailFormat.test(email)) {
-            return res.status(
-                statusCode.BAD_REQUEST).json({
-                message: 'Email is required and must be valid'
-            });
-        }
-        if (!role || !['ADMIN', 'HR', 'STAFF'].includes(role)) {
-            role = 'STAFF';
-        }
-        if(password.length < 8){
-            return res.status(
-                statusCode.BAD_REQUEST).json({
-                message: 'Password must be at least 8 characters long'
-            });
-        }
+        
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
         // call service to create user

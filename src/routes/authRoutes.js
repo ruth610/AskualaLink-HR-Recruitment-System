@@ -2,6 +2,8 @@ import  express  from 'express';
 import  * as authController  from '../controllers/authController.js';
 import  {authMiddleWare}  from '../middlewares/authMiddleware.js';
 import  {authorizeRoles}  from '../middlewares/roleMiddleware.js';
+import { validateRequest }  from '../middlewares/jobMiddleware.js';
+import { userSchema } from '../middlewares/jobMiddleware.js';
 
 const router = express.Router();
 
@@ -38,6 +40,7 @@ const router = express.Router();
 
 router.post(
     '/create-user',
+    validateRequest(userSchema),
     authMiddleWare,
     authorizeRoles('ADMIN'),
     authController.createUser

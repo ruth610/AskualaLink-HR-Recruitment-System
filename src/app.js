@@ -3,13 +3,13 @@ import express from 'express';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from '../src/utils/swagger/swagger.js';
 import * as authRoutes from './routes/authRoutes.js';
+import * as recruitmentRoutes from './routes/recruitmentRoutes.js';
+import multer from 'multer';
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-app.use('/auth', authRoutes.router);
 
 app.use((err, req, res, next) => {
   if (err instanceof multer.MulterError) {
@@ -31,5 +31,9 @@ app.use((err, req, res, next) => {
 
   return res.status(500).json({ success: false, message: 'Internal Server Error'});
 });
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/auth', authRoutes.router);
+app.use('/recruitment', recruitmentRoutes.router);
 
 export default app;

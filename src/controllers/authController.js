@@ -57,7 +57,7 @@ async function login(req,res){
             });
         }
         const payload = {
-            userId: result.data.id,
+            id: result.data.id,
             email: result.data.email,
             fullName: result.data.full_name,
             role: result.data.role
@@ -124,13 +124,14 @@ async function createUser(req, res){
                 message: 'Password is required'
             });
         }
-        if (!email) {
+        emailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email || !emailFormat.test(email)) {
             return res.status(
                 statusCode.BAD_REQUEST).json({
-                message: 'Email is required'
+                message: 'Email is required and must be valid'
             });
         }
-        if (!role) {
+        if (!role || !['ADMIN', 'HR', 'STAFF'].includes(role)) {
             role = 'STAFF';
         }
         if(password.length < 8){

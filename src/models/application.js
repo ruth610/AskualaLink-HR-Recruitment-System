@@ -2,6 +2,7 @@ import { DataTypes, Model } from "sequelize";
 
 const Application = (sequelize, DataTypes)=>{
     class Application extends Model{
+
         static associate(models) {
             Application.belongsTo(models.Job, {
                 foreignKey: 'job_id',
@@ -13,6 +14,7 @@ const Application = (sequelize, DataTypes)=>{
                 as: 'applicant',
             });
         }
+
     }
 
     Application.init( {
@@ -33,9 +35,17 @@ const Application = (sequelize, DataTypes)=>{
             type: DataTypes.ENUM('PENDING','SHORTLISTED', 'REJECTED'),
             defaultValue: 'PENDING',
         },
-        fit_score: {
+        initial_fit_score: {
             type: DataTypes.INTEGER,
             allowNull: true,
+        },
+        final_fit_score: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
+        ai_status: {
+            type: DataTypes.ENUM('PENDING','SHORTLISTED', 'REJECTED'),
+            defaultValue: 'PENDING',
         },
         ai_summary: {
             type: DataTypes.TEXT,

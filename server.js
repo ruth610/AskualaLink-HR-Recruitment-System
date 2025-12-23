@@ -1,5 +1,6 @@
 import app from './src/app.js';
 import db from './src/models/index.js';
+import './src/workers/closeExpiredJobs.js';
 
 const sequelize = db.sequelize;
 

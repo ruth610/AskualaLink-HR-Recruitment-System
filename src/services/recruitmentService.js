@@ -1,12 +1,12 @@
 import db from '../models/index.js';
 import statusCode from 'http-status-codes';
 import { validateJobAnswers } from '../utils/dynamicValidator.js';
+import { extractResumeText } from '../utils/resumeTextExtractor.js';
 
 const { Job, Applicant, Application } = db;
 
 export async function createNewJob(jobData) {
     // 1. You can add extra business logic here if needed
-    // (e.g., Check if a job with this title already exists in the same department)
     const {title,department,location,type,status} = jobData;
     const existingJob = await Job.findOne({
         where: {
@@ -15,8 +15,6 @@ export async function createNewJob(jobData) {
             location: location,
             type: type,
             status: "OPEN"
-
-
         }
     });
 
@@ -57,17 +55,15 @@ export const deleteJob = async (jobId, userId, userRole) => {
         err.statusCode = 403;
         throw err;
     }
-
     // // 2. Integrity Check (Count Applicants)
-    // const applicantCount = await Application.count({ where: { job_id: jobId } });
+    const applicantCount = await Application.count({ where: { job_id: jobId } });
 
-    // if (applicantCount > 0) {
-    //     // Soft Delete: Just hide it
-    //     await job.update({ status: 'ARCHIVED' });
-    //     return { message: "Job has applicants; it was archived instead of deleted." };
-    // }
+    if (applicantCount > 0) {
+        // Soft Delete: Just hide it
+        await job.update({ status: 'ARCHIVED' });
+        return { message: "Job has applicants; it was archived instead of deleted." };
+    }
 
-    // Hard Delete: Remove from DB
     await job.destroy();
     return { message: "Job deleted successfully." };
 };
@@ -112,6 +108,13 @@ export const applyToJob = async (jobId, payload) => {
         error.statusCode = statusCode.BAD_REQUEST;
         throw error;
     }
+    
+    const textResume = await extractResumeText(payload.resumeUrl);
+    if(!textResume){
+        const error = new Error("Could not extract text from resume");
+        error.statusCode = statusCode.BAD_REQUEST;
+        throw error;
+    }
 
     let applicant = await Applicant.findOne({
       where: { email: payload.email },
@@ -125,6 +128,7 @@ export const applyToJob = async (jobId, payload) => {
         email: payload.email,
         phone: payload.phone,
         resume_url: payload.resumeUrl,
+        resume_text: textResume,
       }, { transaction });
     }
     //  check if the same application exists

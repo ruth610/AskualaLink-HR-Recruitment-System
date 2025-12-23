@@ -35,6 +35,10 @@ const Applicant = (sequelize, DataTypes) =>{
             type: DataTypes.STRING,
             allowNull: false,
         },
+        resume_text: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        },
         created_at: {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW,
@@ -49,7 +53,7 @@ const Applicant = (sequelize, DataTypes) =>{
         tableName: 'applicants',
         underscored: true,
     });
-    
+
     return Applicant;
 }
 

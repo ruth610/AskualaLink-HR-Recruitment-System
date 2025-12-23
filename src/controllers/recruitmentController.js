@@ -1,6 +1,7 @@
 import * as recruitmentService from '../services/recruitmentService.js';
 import statusCode from 'http-status-codes';
 import fs from 'fs/promises';
+import { triggerApplicationScoring } from '../workers/aiTrigger.js';
 
 async function createJob(req, res, next) {
     console.log("POSTMAN SENT:", req.body);
@@ -128,6 +129,9 @@ async function getJobDetails(req, res, next) {
 }
 
 const applyJob = async (req, res,next) => {
+    const cleanupFile = async () => {
+        if (req.file) await fs.unlink(req.file.path).catch(() => {});
+    };
 
     try {
         if (!req.file) {
@@ -138,11 +142,11 @@ const applyJob = async (req, res,next) => {
         const { full_name, email, phone ,custom_field_values} = req.body;
         const jobId = req.params.id;
         if(!full_name){
-            await fs.unlink(resumePath);
+            await cleanupFile();
             return  res.status(statusCode.BAD_REQUEST).json({ message: 'Full name is required' });
         }
         if(!email){
-            await fs.unlink(resumePath);
+            await cleanupFile();
             return  res.status(statusCode.BAD_REQUEST).json({ message: 'Email is required' });
         }
 
@@ -151,7 +155,7 @@ const applyJob = async (req, res,next) => {
             try {
                 parsedCustomFieldValues = JSON.parse(custom_field_values);
             } catch (error) {
-                 await fs.unlink(resumePath);
+                 await cleanupFile();
                  return res.status(statusCode.BAD_REQUEST).json({ message: 'Invalid custom_field_values format' });
             }
         }
@@ -164,10 +168,9 @@ const applyJob = async (req, res,next) => {
             custom_field_values: parsedCustomFieldValues,
         });
 
-        if(application.error){
-            await fs.unlink(resumePath);
-            return res.status(application.statusCode || statusCode.BAD_REQUEST).json({ message: application.error });
-        }
+        setImmediate(() => {
+            triggerApplicationScoring(application.id);
+        });
 
         return res.status(statusCode.CREATED).json({
             message: 'Application submitted successfully',
@@ -175,9 +178,7 @@ const applyJob = async (req, res,next) => {
         });
 
         } catch (error) {
-            if(req.file){
-                await fs.unlink(req.file.path);
-            }
+            await cleanupFile();
             next(error);
         }
 };

@@ -1,5 +1,6 @@
 import * as recruitmentService from '../services/recruitmentService.js';
 import statusCode from 'http-status-codes';
+import fs from 'fs/promises';
 
 async function createJob(req, res, next) {
     console.log("POSTMAN SENT:", req.body);
@@ -126,4 +127,54 @@ async function getJobDetails(req, res, next) {
     }
 }
 
-export { createJob, updateJob, deleteJob, getJobDetails };
+const applyJob = async (req, res,next) => {
+
+    try {
+        if (!req.file) {
+            return res.status(statusCode.BAD_REQUEST).json({ message: 'Resume is required' });
+        }
+
+        const resumePath = req.file.path;
+        const { full_name, email, phone ,custom_field_values} = req.body;
+        const jobId = req.params.id;
+        if(!full_name){
+            await fs.unlink(resumePath);
+            return  res.status(statusCode.BAD_REQUEST).json({ message: 'Full name is required' });
+        }
+        if(!email){
+            await fs.unlink(resumePath);
+            return  res.status(statusCode.BAD_REQUEST).json({ message: 'Email is required' });
+        }
+
+        let parsedCustomFieldValues = custom_field_values;
+        if (typeof custom_field_values === 'string') {
+            try {
+                parsedCustomFieldValues = JSON.parse(custom_field_values);
+            } catch (error) {
+                 await fs.unlink(resumePath);
+                 return res.status(statusCode.BAD_REQUEST).json({ message: 'Invalid custom_field_values format' });
+            }
+        }
+
+        const application = await recruitmentService.applyToJob(jobId, {
+            full_name,
+            email,
+            phone,
+            resumeUrl: resumePath,
+            custom_field_values: parsedCustomFieldValues,
+        });
+
+        return res.status(statusCode.CREATED).json({
+            message: 'Application submitted successfully',
+            data: application,
+        });
+
+        } catch (error) {
+            if(req.file){
+                await fs.unlink(req.file.path);
+            }
+            next(error);
+        }
+};
+
+export { createJob, updateJob, deleteJob, getJobDetails, applyJob };

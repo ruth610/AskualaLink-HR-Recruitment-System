@@ -9,6 +9,10 @@ const Job = (sequelize, DataTypes)=>{
                 foreignKey: 'created_by',
                 as: 'creator',
         });
+            Job.hasMany(models.Application, {
+                foreignKey: 'job_id',
+                as: 'applications',
+            });
         }
     }
 

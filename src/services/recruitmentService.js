@@ -1,7 +1,8 @@
 import db from '../models/index.js';
 import statusCode from 'http-status-codes';
+import { validateJobAnswers } from '../utils/dynamicValidator.js';
 
-const { Job } = db;
+const { Job, Applicant, Application } = db;
 
 export async function createNewJob(jobData) {
     // 1. You can add extra business logic here if needed
@@ -79,4 +80,66 @@ export const getJobDetails = async (jobId) => {
         throw error;
     }
     return job;
+};
+
+export const applyToJob = async (jobId, payload) => {
+  const transaction = await db.sequelize.transaction();
+
+  try {
+    const job = await Job.findByPk(jobId, { transaction });
+    if (!job) {
+      const error = new Error("Job not found");
+      error.statusCode = statusCode.NOT_FOUND;
+      throw error;
+    }
+    const {deadline,status,custom_fields} = job;
+    const currentDate = new Date();
+
+    if(currentDate > deadline){
+        const error = new Error("Application deadline has passed");
+        error.statusCode = statusCode.BAD_REQUEST;
+        throw error;
+    }
+    if(status !== 'OPEN'){
+        const error = new Error("Job is not open for applications");
+        error.statusCode = statusCode.BAD_REQUEST;
+        throw error;
+    }
+    const validationErrors = validateJobAnswers(custom_fields, payload.custom_field_values);
+
+    if (validationErrors) {
+        const error = new Error("Validation errors in custom fields: " + validationErrors.join(', '));
+        error.statusCode = statusCode.BAD_REQUEST;
+        throw error;
+    }
+
+    let applicant = await Applicant.findOne({
+      where: { email: payload.email },
+      transaction,
+    });
+
+    // 2. Create applicant if not exists
+    if (!applicant) {
+      applicant = await Applicant.create({
+        full_name: payload.full_name,
+        email: payload.email,
+        phone: payload.phone,
+        resume_url: payload.resumeUrl,
+      }, { transaction });
+    }
+
+    // 3. Create application
+    const application = await Application.create({
+      job_id: jobId,
+      applicant_id: applicant.id,
+      custom_field_values: payload.custom_field_values,
+    }, { transaction });
+
+    await transaction.commit();
+    return application;
+
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
 };

@@ -1,22 +1,47 @@
 'use strict';
 
-/** @type {import('sequelize-cli').Migration} */
-module.exports = {
-  async up (queryInterface, Sequelize) {
-    /**
-     * Add altering commands here.
-     *
-     * Example:
-     * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
-     */
-  },
+export async function up(queryInterface, Sequelize) {
+  await queryInterface.createTable('applicants', {
+    id: {
+      type: Sequelize.UUID,
+      defaultValue: Sequelize.literal('gen_random_uuid()'),
+      primaryKey: true,
+      allowNull: false,
+    },
 
-  async down (queryInterface, Sequelize) {
-    /**
-     * Add reverting commands here.
-     *
-     * Example:
-     * await queryInterface.dropTable('users');
-     */
-  }
-};
+    name: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
+
+    email: {
+      type: Sequelize.STRING,
+      allowNull: false,
+      unique: true,
+    },
+
+    phone: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
+
+    resume_url: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
+
+    created_at: {
+      type: Sequelize.DATE,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+    },
+
+    updated_at: {
+      type: Sequelize.DATE,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+    },
+  });
+}
+
+export async function down(queryInterface) {
+  await queryInterface.dropTable('applicants');
+}

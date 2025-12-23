@@ -43,7 +43,11 @@ export async function up(queryInterface, Sequelize) {
       type: Sequelize.TEXT,
       allowNull: true,
     },
-
+    custom_field_values: {
+      type: Sequelize.JSONB,
+      allowNull: false,
+      defaultValue: {},
+    },
     created_at: {
       type: Sequelize.DATE,
       defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),

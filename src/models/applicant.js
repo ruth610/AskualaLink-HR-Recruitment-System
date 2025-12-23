@@ -49,8 +49,8 @@ const Applicant = (sequelize, DataTypes) =>{
         tableName: 'applicants',
         underscored: true,
     });
-
-
+    
+    return Applicant;
 }
 
 export default Applicant;

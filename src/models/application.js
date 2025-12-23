@@ -21,8 +21,16 @@ const Application = (sequelize, DataTypes)=>{
             defaultValue: DataTypes.UUIDV4,
             primaryKey: true,
         },
+        job_id: {
+            type: DataTypes.UUID,
+            allowNull: false,
+        },
+        applicant_id: {
+            type: DataTypes.UUID,
+            allowNull: false,
+        },
         status: {
-            type: DataTypes.ENUM('PENDING', 'SHORTLISTED', 'REJECTED'),
+            type: DataTypes.ENUM('PENDING','SHORTLISTED', 'REJECTED'),
             defaultValue: 'PENDING',
         },
         fit_score: {
@@ -32,6 +40,11 @@ const Application = (sequelize, DataTypes)=>{
         ai_summary: {
             type: DataTypes.TEXT,
             allowNull: true,
+        },
+        custom_field_values: {
+            type: DataTypes.JSONB,
+            allowNull: false,
+            defaultValue: {}
         },
         created_at: {
             type: DataTypes.DATE,
@@ -48,6 +61,7 @@ const Application = (sequelize, DataTypes)=>{
         underscored: true,
         }
     );
+    return Application;
 };
 
 export default Application;

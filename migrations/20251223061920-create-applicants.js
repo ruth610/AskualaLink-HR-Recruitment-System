@@ -9,7 +9,7 @@ export async function up(queryInterface, Sequelize) {
       allowNull: false,
     },
 
-    name: {
+    full_name: {
       type: Sequelize.STRING,
       allowNull: false,
     },

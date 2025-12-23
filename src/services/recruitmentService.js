@@ -127,8 +127,21 @@ export const applyToJob = async (jobId, payload) => {
         resume_url: payload.resumeUrl,
       }, { transaction });
     }
+    //  check if the same application exists
+    const existingApplication = await Application.findOne({
+        where: {
+            job_id: jobId,
+            applicant_id: applicant.id,
+        },
+        transaction,
+    });
 
-    // 3. Create application
+    if (existingApplication) {
+        const error = new Error("You have already applied for this job");
+        error.statusCode = statusCode.CONFLICT;
+        throw error;
+    }
+
     const application = await Application.create({
       job_id: jobId,
       applicant_id: applicant.id,

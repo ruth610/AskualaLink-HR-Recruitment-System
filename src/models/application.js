@@ -33,10 +33,14 @@ const Application = (sequelize, DataTypes)=>{
             type: DataTypes.TEXT,
             allowNull: true,
         },
-        applied_at: {
+        created_at: {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW,
-        }
+        },
+        updated_at: {
+            type: DataTypes.DATE,
+            defaultValue: DataTypes.NOW,
+        },
     },{
         sequelize,
         modelName: 'Application',

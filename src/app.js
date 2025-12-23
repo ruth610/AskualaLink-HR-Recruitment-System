@@ -11,6 +11,10 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/auth', authRoutes.router);
+app.use('/recruitment', recruitmentRoutes.router);
+
 app.use((err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     if (err.code === 'LIMIT_FILE_SIZE') {
@@ -29,11 +33,10 @@ app.use((err, req, res, next) => {
     });
   }
 
-  return res.status(500).json({ success: false, message: 'Internal Server Error'});
-});
+  const statusCode = err.statusCode || 500;
+  const message = err.message;
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-app.use('/auth', authRoutes.router);
-app.use('/recruitment', recruitmentRoutes.router);
+  return res.status(statusCode).json({ success: false, message: message});
+});
 
 export default app;

@@ -164,6 +164,11 @@ const applyJob = async (req, res,next) => {
             custom_field_values: parsedCustomFieldValues,
         });
 
+        if(application.error){
+            await fs.unlink(resumePath);
+            return res.status(application.statusCode || statusCode.BAD_REQUEST).json({ message: application.error });
+        }
+
         return res.status(statusCode.CREATED).json({
             message: 'Application submitted successfully',
             data: application,

@@ -5,6 +5,7 @@ import  {authorizeRoles}  from '../middlewares/roleMiddleware.js';
 import { uploads } from '../middlewares/uploadMiddleware.js';
 import { validateRequest } from '../middlewares/jobMiddleware.js';
 import { createJobSchema } from '../middlewares/jobMiddleware.js';
+import {triggerApplicationScoring} from '../workers/aiTrigger.js';
 
 const router = express.Router();
 
@@ -39,6 +40,18 @@ router.post(
     uploads.single('resume'),
     recruitmentController.applyJob
 );
+// quick test route for AI scoring
+router.get(
+    '/job',
+    async (req, res) => {
+        try {
+            await triggerApplicationScoring('09834b1d-dc2e-46dd-b188-2bf6425bd298');
+            return res.status(200).json({ message: 'AI scoring triggered' });
+        } catch (error) {
+            return res.status(500).json({ message: 'Error triggering AI scoring', error: error.message });
+        }
+    }
+)
 
 
 export { router }

@@ -1,50 +1,54 @@
-import OpenAI from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import dotenv from "dotenv";
+dotenv.config();
 
-const client = new OpenAI({
-  apiKey: process.env.AI_API_KEY,
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-export async function scoreApplication({
-  job,
-  applicant,
-  application,
-}) {
-  const prompt = `
-    You are an Applicant Tracking System (ATS).
+export async function scoreApplication({ job, applicant, application }) {
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-    JOB:
-        Title: ${job.title}
-        Department: ${job.department}
-        Requirements: ${job.requirements}
+    const resume_text = applicant.resume_text;
+    if(!resume_text){
+      throw new Error("Applicant resume text is missing");
+    }
+    const prompt = `
+      You are an strict Applicant Tracking System (ATS). Analyze the following candidate.
 
-    APPLICANT:
-        Name: ${applicant.full_name}
-        Email: ${applicant.email}
+      JOB DETAILS:
+      - Title: ${job.title}
+      - Department: ${job.department}
+      - Requirements: ${job.requirements}
 
-    CUSTOM FIELD ANSWERS:
-        ${JSON.stringify(application.custom_field_values, null, 2)}
+      APPLICANT DATA:
+      - Name: ${applicant.full_name}
+      - Custom Answers: ${JSON.stringify(application.custom_field_values)}
+      - Resume Text: "${applicant.resume_text?.slice(0, 4000) || "No resume text provided"}"
 
-    APPLICANT RESUME:
-        ${applicant.resume_text?.slice(0, 3000)}
+      TASK:
+      1. Calculate a fit score from 0 to 100 based on how well the resume matches the requirements.
+      2. Write a professional summary (max 3 sentences) justifying the score.
 
-    TASK:
-        1. Give a fit score from 0 to 10
-        2. Write a short professional summary (max 4 sentences)
-
-    Return JSON only:
-        {
+      OUTPUT FORMAT:
+      Return strictly a raw JSON object with no markdown formatting or backticks.
+      {
         "initial_fit_score": number,
         "ai_summary": string
-        }
-        `;
+      }
+    `;
 
-    const response = await client.chat.completions.create({
-        model: "gpt-4.1-mini", // cheap + good
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.2,
-    });
+    const result = await model.generateContent(prompt);
+    const response = result.response;
+    let text = response.text();
 
-    const content = response.choices[0].message.content;
-    console.log(JSON.parse(content));
-    return JSON.parse(content);
+    text = text.replace(/```json|```/g, "").trim();
+
+    const parsedData = JSON.parse(text);
+
+    return parsedData;
+
+  } catch (error) {
+    // console.error("Gemini AI Error:", error.message);
+    return null;
+  }
 }

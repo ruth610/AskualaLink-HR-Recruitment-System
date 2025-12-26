@@ -108,13 +108,25 @@ export const applyToJob = async (jobId, payload) => {
         error.statusCode = statusCode.BAD_REQUEST;
         throw error;
     }
-    
+
     const textResume = await extractResumeText(payload.resumeUrl);
     if(!textResume){
         const error = new Error("Could not extract text from resume");
         error.statusCode = statusCode.BAD_REQUEST;
         throw error;
     }
+    const dublicateResume = await Applicant.findOne({
+        where: {
+            resume_text: textResume,
+            email: { [db.Sequelize.Op.ne]: payload.email}
+        },
+        transaction,
+      });
+        if (dublicateResume) {
+            const error = new Error("A similar resume has already been submitted with a different email.");
+            error.statusCode = statusCode.CONFLICT;
+            throw error;
+        }
 
     let applicant = await Applicant.findOne({
       where: { email: payload.email },

@@ -10,12 +10,10 @@ if(!fs.existsSync(uploadsDir)){
 
 const storage = multer.diskStorage({
     destination :(req,file,cb)=>{
-        console.log(file);
         cb(null, uploadsDir);
     },
     filename: (req,file,cb)=>{
         const sanitizedName = file.originalname.replace(/\s+/g, '-').toLowerCase();
-        console.log(sanitizedName);
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
 
         cb(null,`${uniqueSuffix}-${sanitizedName}`);

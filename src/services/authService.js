@@ -15,8 +15,6 @@ async function login(email, password) {
         }
         const isMatch = await bcrypt.compare(password, user.password_hash);
 
-        console.log(isMatch);
-        console.log(user.password_hash);
         if (!isMatch) {
             return {
                 status: statusCode.UNAUTHORIZED,

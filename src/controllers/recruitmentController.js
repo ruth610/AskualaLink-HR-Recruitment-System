@@ -4,7 +4,6 @@ import fs from 'fs/promises';
 import { triggerApplicationScoring } from '../workers/aiTrigger.js';
 
 async function createJob(req, res, next) {
-    console.log("POSTMAN SENT:", req.body);
     try {
         const {
             title,
@@ -48,7 +47,6 @@ async function createJob(req, res, next) {
         });
 
     } catch (error) {
-        console.log(error);
         if(error.statusCode){
             return res.status(error.statusCode).json({
                 success: false,
@@ -73,7 +71,6 @@ async function updateJob(req, res, next) {
             data: updatedJob
         });
     } catch (error) {
-        console.log(error);
         if(error.statusCode){
             return res.status(error.statusCode).json({
                 success: false,
@@ -96,7 +93,6 @@ async function deleteJob(req, res, next) {
             message: result.message
         });
     } catch (error) {
-        console.log(error);
         if(error.statusCode){
             return res.status(error.statusCode).json({
                 success: false,
@@ -117,7 +113,6 @@ async function getJobDetails(req, res, next) {
         });
     }
     catch (error) {
-        console.log(error);
         if(error.statusCode){
             return res.status(error.statusCode).json({
                 success: false,

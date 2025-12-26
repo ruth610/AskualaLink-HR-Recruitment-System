@@ -6,7 +6,7 @@ const { Job } = db;
 // console.log('checking for the expired job');
 
 cron.schedule('0 * * * *', async () => {
-  console.log('⏰ Checking for expired jobs...');
+  // console.log('⏰ Checking for expired jobs...');
 
   try {
     const now = new Date();
@@ -19,12 +19,12 @@ cron.schedule('0 * * * *', async () => {
       attributes: ['id', 'title', 'deadline', 'status'],
     });
 
-    console.log(`🔍 Found ${expiredJobs.length} expired OPEN jobs`);
+    // console.log(`🔍 Found ${expiredJobs.length} expired OPEN jobs`);
 
     expiredJobs.forEach(job => {
-      console.log(
-        `→ Job ${job.id} | ${job.title} | deadline=${job.deadline}`
-      );
+      // console.log(
+      //   `→ Job ${job.id} | ${job.title} | deadline=${job.deadline}`
+      // );
     });
 
     const [updatedCount] = await Job.update(
@@ -37,8 +37,8 @@ cron.schedule('0 * * * *', async () => {
       }
     );
 
-    console.log(`Closed ${updatedCount} jobs`);
   } catch (error) {
-    console.error('Failed to close expired jobs:', error);
+    // console.error('Error while closing expired jobs:', error);
+
   }
 });

@@ -114,37 +114,17 @@ export const applyToJob = async (jobId, payload) => {
     // console.log(payload.resumeUrl);
     const textResume = await extractResumeText(payload.resumeUrl);
     // console.log(textResume);
+
     if(!textResume){
         const error = new Error("Could not extract text from resume");
         error.statusCode = statusCode.BAD_REQUEST;
         throw error;
     }
-    const normalized = normalizeResume(textResume);
-    const hash = sha256(normalized);
-
-    const existing = await Resume.findOne({
-      where: { resumeHash: hash },
-      transaction,
-    });
-
-    if (existing) {
-      const error = new Error("Exact duplicate resume found");
-      error.statusCode = statusCode.CONFLICT;
-      throw error;
-    }
-    const resume = await Resume.create(
-      {
-        resumeHash: hash,
-        rawText: textResume,
-      },
-      { transaction }
-    );
 
     let applicant = await Applicant.findOne({
       where: { email: payload.email },
       transaction,
     });
-
     if (!applicant) {
       applicant = await Applicant.create({
         full_name: payload.full_name,
@@ -154,6 +134,34 @@ export const applyToJob = async (jobId, payload) => {
         resume_text: textResume,
       }, { transaction });
     }
+
+    const normalized = normalizeResume(textResume);
+    const hash = sha256(normalized);
+
+    const existing = await Resume.findOne({
+      where: { resumeHash: hash },
+      transaction,
+    });
+
+    if(existing){
+      if ( existing.applicantId !== applicant.id ) {
+        const error = new Error("Exact duplicate resume found");
+        error.statusCode = statusCode.CONFLICT;
+        throw error;
+      }
+
+    }
+    else{
+      const resume = await Resume.create(
+      {
+        resumeHash: hash,
+        rawText: textResume,
+        applicantId: applicant.id,
+      },
+      { transaction }
+      );
+    }
+
     const existingApplication = await Application.findOne({
         where: {
             job_id: jobId,

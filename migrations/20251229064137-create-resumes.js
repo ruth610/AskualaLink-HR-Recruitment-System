@@ -8,6 +8,15 @@ export async function up(queryInterface, Sequelize) {
       autoIncrement: true,
       allowNull: false,
     },
+    applicant_id: {
+      type: Sequelize.UUID,
+      allowNull: false,
+      references: {
+        model: 'applicants',
+        key: 'id',
+      },
+      onDelete: 'CASCADE',
+    },
 
     resume_hash: {
       type: Sequelize.STRING(64),

@@ -1,5 +1,6 @@
 import express from 'express';
 import * as recruitmentController from '../controllers/recruitmentController.js';
+import * as payRollController from '../services/payrollService.js';
 import  {authMiddleWare}  from '../middlewares/authMiddleware.js';
 import  {authorizeRoles}  from '../middlewares/roleMiddleware.js';
 import { uploads } from '../middlewares/uploadMiddleware.js';
@@ -40,6 +41,5 @@ router.post(
     uploads.single('resume'),
     recruitmentController.applyJob
 );
-
 
 export { router }

@@ -38,6 +38,7 @@ export async function scoreApplication({ job, applicant, application }) {
     `;
 
     const result = await model.generateContent(prompt);
+    console.log(result);
     const response = result.response;
     let text = response.text();
 
@@ -48,7 +49,7 @@ export async function scoreApplication({ job, applicant, application }) {
     return parsedData;
 
   } catch (error) {
-    // console.error("Gemini AI Error:", error.message);
+    console.error("Gemini AI Error:", error.message);
     return null;
   }
 }

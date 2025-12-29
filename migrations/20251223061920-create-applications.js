@@ -72,6 +72,7 @@ export async function up(queryInterface, Sequelize) {
     type: 'unique',
     name: 'unique_job_applicant',
   });
+
 }
 
 export async function down(queryInterface) {

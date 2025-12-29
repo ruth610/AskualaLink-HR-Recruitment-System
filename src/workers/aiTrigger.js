@@ -30,8 +30,8 @@ export async function triggerApplicationScoring(applicationId) {
       ai_status: initial_fit >= min_fit_score ? 'SHORTLISTED' : 'REJECTED',
     });
 
-    // console.log(result);
-    // console.log(`Application ${applicationId} scored`);
+    console.log(result);
+    console.log(`Application ${applicationId} scored`);
   } catch (err) {
     const application = await db.Application.findByPk(applicationId);
     if (!application) return;

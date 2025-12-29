@@ -1,0 +1,34 @@
+'use strict';
+import {DataTypes, Model} from 'sequelize';
+
+
+const Resume = (sequelize, DataTypes)=>{
+    class Resume extends Model{
+    }
+    Resume.init({
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+    },
+    resumeHash: {
+        type: DataTypes.STRING(64),
+        unique: true,
+    },
+    rawText: {
+        type: DataTypes.TEXT,
+    },
+
+    },
+    {
+        sequelize,
+        modelName: 'Resume',
+        tableName: 'resumes',
+        underscored: true,
+        timestamps: true,
+    }
+    );
+    return Resume;
+};
+
+export default Resume;

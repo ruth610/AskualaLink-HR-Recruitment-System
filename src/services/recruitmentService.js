@@ -2,8 +2,11 @@ import db from '../models/index.js';
 import statusCode from 'http-status-codes';
 import { validateJobAnswers } from '../utils/dynamicValidator.js';
 import { extractResumeText } from '../utils/resumeTextExtractor.js';
+import { normalizeResume } from '../utils/textNormalize.js';
+import { sha256 } from '../utils/textHash.js';
+import { triggerApplicationScoring } from '../workers/aiTrigger.js';
 
-const { Job, Applicant, Application } = db;
+const { Job, Applicant, Application, Resume } = db;
 
 export async function createNewJob(jobData) {
     // 1. You can add extra business logic here if needed
@@ -108,32 +111,40 @@ export const applyToJob = async (jobId, payload) => {
         error.statusCode = statusCode.BAD_REQUEST;
         throw error;
     }
-
+    // console.log(payload.resumeUrl);
     const textResume = await extractResumeText(payload.resumeUrl);
+    // console.log(textResume);
     if(!textResume){
         const error = new Error("Could not extract text from resume");
         error.statusCode = statusCode.BAD_REQUEST;
         throw error;
     }
-    const dublicateResume = await Applicant.findOne({
-        where: {
-            resume_text: textResume,
-            email: { [db.Sequelize.Op.ne]: payload.email}
-        },
-        transaction,
-      });
-        if (dublicateResume) {
-            const error = new Error("A similar resume has already been submitted with a different email.");
-            error.statusCode = statusCode.CONFLICT;
-            throw error;
-        }
+    const normalized = normalizeResume(textResume);
+    const hash = sha256(normalized);
+
+    const existing = await Resume.findOne({
+      where: { resumeHash: hash },
+      transaction,
+    });
+
+    if (existing) {
+      const error = new Error("Exact duplicate resume found");
+      error.statusCode = statusCode.CONFLICT;
+      throw error;
+    }
+    const resume = await Resume.create(
+      {
+        resumeHash: hash,
+        rawText: textResume,
+      },
+      { transaction }
+    );
 
     let applicant = await Applicant.findOne({
       where: { email: payload.email },
       transaction,
     });
 
-    // 2. Create applicant if not exists
     if (!applicant) {
       applicant = await Applicant.create({
         full_name: payload.full_name,
@@ -143,7 +154,6 @@ export const applyToJob = async (jobId, payload) => {
         resume_text: textResume,
       }, { transaction });
     }
-    //  check if the same application exists
     const existingApplication = await Application.findOne({
         where: {
             job_id: jobId,
@@ -157,18 +167,23 @@ export const applyToJob = async (jobId, payload) => {
         error.statusCode = statusCode.CONFLICT;
         throw error;
     }
-
     const application = await Application.create({
       job_id: jobId,
       applicant_id: applicant.id,
       custom_field_values: payload.custom_field_values,
-    }, { transaction });
-
+      },
+      { transaction });
     await transaction.commit();
+    // Trigger AI Scoring Asynchronously
+    triggerApplicationScoring(application.id).catch(err => {
+        console.error("AI Scoring Trigger Failed:", err);
+    });
+
     return application;
 
   } catch (error) {
-    await transaction.rollback();
+    // console.log(error);
+    if(transaction) await transaction.rollback();
     throw error;
   }
 };

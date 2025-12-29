@@ -24,6 +24,11 @@ export async function up(queryInterface, Sequelize) {
       type: Sequelize.STRING,
       allowNull: true,
     },
+    is_duplicate: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false,
+      allowNull: false,
+    },
 
     resume_url: {
       type: Sequelize.STRING,

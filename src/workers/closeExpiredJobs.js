@@ -39,6 +39,5 @@ cron.schedule('0 * * * *', async () => {
 
   } catch (error) {
     // console.error('Error while closing expired jobs:', error);
-
   }
 });

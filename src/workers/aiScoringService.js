@@ -23,7 +23,7 @@ export async function scoreApplication({ job, applicant, application }) {
       APPLICANT DATA:
       - Name: ${applicant.full_name}
       - Custom Answers: ${JSON.stringify(application.custom_field_values)}
-      - Resume Text: "${applicant.resume_text?.slice(0, 4000) || "No resume text provided"}"
+      - Resume Text: "${resume_text.slice(0, 4000) || "No resume text provided"}"
 
       TASK:
       1. Calculate a fit score from 0 to 100 based on how well the resume matches the requirements.
@@ -38,7 +38,7 @@ export async function scoreApplication({ job, applicant, application }) {
     `;
 
     const result = await model.generateContent(prompt);
-    console.log(result);
+    // console.log(result);
     const response = result.response;
     let text = response.text();
 
@@ -49,7 +49,7 @@ export async function scoreApplication({ job, applicant, application }) {
     return parsedData;
 
   } catch (error) {
-    console.error("Gemini AI Error:", error.message);
-    return null;
+    // console.error("Gemini AI Error:", error.message);
+    throw error;
   }
 }

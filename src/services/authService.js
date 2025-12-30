@@ -66,7 +66,33 @@ async function createUser(userData) {
     }
 }
 
+async function getAllUsers() {
+    try {
+        const users = await User.findAll({
+            attributes: { exclude: ['password_hash', 'createdAt', 'updatedAt',] }
+        });
+        if (users.length === 0) {
+            return {
+                status: statusCode.NOT_FOUND,
+                message: 'No users found'
+            };
+        }
+        return {
+            status: statusCode.OK,
+            message: 'Users retrieved successfully',
+            data: users
+        };
+    } catch (error) {
+        console.error('Error in authService getAllUsers:', error);
+        return {
+            status: statusCode.INTERNAL_SERVER_ERROR,
+            message: 'Internal server error'
+        };
+    }
+}
+
 export {
     login,
-    createUser
+    createUser,
+    getAllUsers,
 }

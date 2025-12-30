@@ -2,8 +2,10 @@ import  express  from 'express';
 import  * as authController  from '../controllers/authController.js';
 import  {authMiddleWare}  from '../middlewares/authMiddleware.js';
 import  {authorizeRoles}  from '../middlewares/roleMiddleware.js';
+import { decryptSensitiveFields } from '../middlewares/encryptionMiddleware.js';
 import { validateRequest }  from '../middlewares/jobMiddleware.js';
 import { userSchema } from '../middlewares/jobMiddleware.js';
+import { checkOfficeIP } from '../middlewares/verifyWiFiMiddleware.js';
 
 const router = express.Router();
 
@@ -43,6 +45,7 @@ router.post(
     validateRequest(userSchema),
     authMiddleWare,
     authorizeRoles('ADMIN'),
+    checkOfficeIP,
     authController.createUser
 );
 
@@ -71,5 +74,15 @@ router.post(
     '/login',
     authController.login
 );
+
+
+router.get(
+    '/users',
+    authMiddleWare,
+    authorizeRoles('ADMIN'),
+    decryptSensitiveFields,
+    checkOfficeIP,
+    authController.getAllUsers
+)
 
 export { router };

@@ -111,7 +111,7 @@ async function login(req,res){
 async function createUser(req, res){
     try {
         const { full_name, password, email, role } = req.body;
-        
+
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
         // call service to create user
@@ -141,7 +141,31 @@ async function createUser(req, res){
     }
 }
 
+async function getAllUsers(req, res) {
+    try {
+        const result = await authService.getAllUsers();
+        if (result.status !== statusCode.OK) {
+            return res.status(
+                result.status).json({
+                message: result.message
+            });
+        }
+        return res.status(
+            result.status).json({
+            message: result.message,
+            data: result.data
+        });
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        return res.status(
+            statusCode.INTERNAL_SERVER_ERROR).json({
+            message: 'Internal server error' }
+        );
+    }
+}
+
 export {
     login,
-    createUser
+    createUser,
+    getAllUsers,
 }

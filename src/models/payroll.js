@@ -1,7 +1,7 @@
-import { DataTypes } from 'sequelize';
+import { DataTypes, Model } from 'sequelize';
 
 const Payroll = (sequelize, DataTypes) => {
-    class Payroll extends sequelize.Model {
+    class Payroll extends Model {
         static associate(models) {
             Payroll.belongsTo(
                 models.User,
@@ -69,3 +69,4 @@ const Payroll = (sequelize, DataTypes) => {
 
   return Payroll;
 };
+export default Payroll;

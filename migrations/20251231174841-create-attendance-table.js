@@ -30,7 +30,7 @@ export async function up(queryInterface, Sequelize) {
       allowNull: true
     },
     status: {
-      type: Sequelize.ENUM('PENDING','PRESENT','LATE','ABSENT'),
+      type: Sequelize.ENUM('PENDING','PRESENT','LATE','ABSENT','INCOMPLETE','UNDER_TIME'),
       allowNull: false,
       defaultValue: 'PENDING'
     },

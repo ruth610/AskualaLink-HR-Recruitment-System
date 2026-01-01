@@ -32,9 +32,9 @@ const Attendance = (sequelize, DataTypes)=>{
             type: DataTypes.DATE
         },
         status: {
-            type: DataTypes.ENUM('PENDING', 'PRESENT', 'LATE', 'ABSENT'),
+            type: DataTypes.ENUM('ABSENT','PRESENT', 'LATE', 'LATE_BUT_INCOMPLETE','PRESENT_BUT_INCOMPLETE','PRESENT_BUT_UNDER_TIME','LATE_AND_UNDER_TIME'),
             allowNull: false,
-            defaultValue: 'PENDING'
+            defaultValue: 'ABSENT'
         }
     }, {
         sequelize,

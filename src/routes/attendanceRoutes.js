@@ -11,3 +11,12 @@ router.post(
     checkOfficeIP,
     attendanceController.clockIn
 );
+
+router.post(
+    '/clock-out',
+    authMiddleWare,
+    checkOfficeIP,
+    attendanceController.clockOut
+);
+
+export default router;

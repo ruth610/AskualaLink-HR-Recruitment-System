@@ -32,7 +32,7 @@ const Application = (sequelize, DataTypes)=>{
             allowNull: false,
         },
         status: {
-            type: DataTypes.ENUM('PENDING','SHORTLISTED', 'REJECTED'),
+            type: DataTypes.ENUM('PENDING','SHORTLISTED', 'REJECTED', 'INTERVIEW','HIRED'),
             defaultValue: 'PENDING',
         },
         initial_fit_score: {
@@ -56,6 +56,22 @@ const Application = (sequelize, DataTypes)=>{
             allowNull: false,
             defaultValue: {}
         },
+        interview_start: {
+            type: DataTypes.DATE,
+            allowNull: true
+        },
+        interview_end: {
+            type: DataTypes.DATE,
+            allowNull: true
+        },
+        interview_slot_id: {
+            type: DataTypes.UUID, 
+            allowNull: true
+        },
+        interview_invited_at: {
+            type: DataTypes.DATE,
+            allowNull: true
+        },
         created_at: {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW,
@@ -64,6 +80,7 @@ const Application = (sequelize, DataTypes)=>{
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW,
         },
+
     },{
         sequelize,
         modelName: 'Application',

@@ -178,4 +178,38 @@ const applyJob = async (req, res,next) => {
         }
 };
 
-export { createJob, updateJob, deleteJob, getJobDetails, applyJob };
+async function inviteToInterview (req, res, next) {
+  try {
+    const { id } = req.params;
+    const interviewData = req.body;
+
+    if (!id) {
+      return res.status(400).json({
+        message: 'JOB ID is required'
+      });
+    }
+    if(!interviewData){
+      return res.status(400).json({
+        message: 'Interview data is required'
+      });
+    }
+    // console.log(interviewData);
+    const result = await recruitmentService.inviteApplicantToInterview(id, interviewData);
+    // console.log(result);
+    if(!result){
+      return res.status(result.statusCode).json({
+        message: result.message
+      });
+    }
+
+    return res.status(200).json({
+      message: 'Interview invitation sent successfully',
+      data: result
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+export { createJob, updateJob, deleteJob, getJobDetails, applyJob, inviteToInterview };

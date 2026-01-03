@@ -4,6 +4,7 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from '../src/utils/swagger/swagger.js';
 import * as authRoutes from './routes/authRoutes.js';
 import * as recruitmentRoutes from './routes/recruitmentRoutes.js';
+import  * as emailRoutes from './routes/emailRoutes.js';
 import multer from 'multer';
 import cors from 'cors';
 
@@ -26,6 +27,7 @@ app.use(cors());
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/auth', authRoutes.router);
 app.use('/recruitment', recruitmentRoutes.router);
+app.use('/email', emailRoutes.router);
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ success: false, message: "Route not found" });

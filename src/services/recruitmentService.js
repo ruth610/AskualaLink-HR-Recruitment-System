@@ -5,8 +5,12 @@ import { extractResumeText } from '../utils/resumeTextExtractor.js';
 import { normalizeResume } from '../utils/textNormalize.js';
 import { sha256 } from '../utils/textHash.js';
 import { triggerApplicationScoring } from '../workers/aiTrigger.js';
+import { interviewInviteTemplate } from '../workers/emailTemplates.js';
+import { generateSlots } from '../utils/interviewSlots.js';
+import { sendEmail } from './emailService.js';
+import { Sequelize } from 'sequelize';
 
-const { Job, Applicant, Application, Resume } = db;
+const { Job, Applicant, Application, Resume, Interview, sequelize } = db;
 
 export async function createNewJob(jobData) {
     // 1. You can add extra business logic here if needed
@@ -192,6 +196,133 @@ export const applyToJob = async (jobId, payload) => {
   } catch (error) {
     // console.log(error);
     if(transaction) await transaction.rollback();
+    throw error;
+  }
+};
+
+export const inviteApplicantToInterview = async (job_id, interviewData) => {
+  let processedCandidates = [];
+  let jobTitle = '';
+
+  try {
+    processedCandidates = await sequelize.transaction(async (t) => {
+
+      const job = await Job.findByPk(job_id, { transaction: t });
+      if (!job) {
+        const error = new Error('Job not found');
+        error.statusCode = statusCode.NOT_FOUND;
+        throw error;
+      }
+      jobTitle = job.title;
+      console.log(jobTitle);
+      console.log(job_id);
+      const candidates = await Application.findAll({
+        where: { job_id, ai_status: 'SHORTLISTED' },
+        include: [{ model: Applicant, as: 'applicant' }],
+        order: [['initial_fit_score', 'DESC']],
+        transaction: t
+      });
+
+      if (!candidates || candidates.length === 0) {
+        const error = new Error('No shortlisted applications found for this job');
+        error.statusCode = statusCode.NOT_FOUND;
+        throw error;
+      }
+      // check if the interview schedule is not created yet
+      const existingInterviews = await Interview.count({
+        where: { jobId: job_id },
+        transaction: t
+      });
+
+      if (existingInterviews > 0) {
+        console.log("Interviews already exist. Proceeding to email phase only.");
+        return candidates;
+      }
+
+      const slots = generateSlots(interviewData, candidates.length);
+      console.log(slots);
+      const results = [];
+
+      for (let i = 0; i < candidates.length; i++) {
+        const slot = slots[i];
+        const app = candidates[i];
+
+        const interview = await Interview.create({
+          jobId: job_id,
+          applicationId: app.id,
+          startTime: slot.start,
+          endTime: slot.end,
+          status: 'SCHEDULED',
+          meetingLink: interviewData.meeting_link
+        }, { transaction: t });
+
+        app.status = 'SHORTLISTED';
+        // console.log(`Scheduled interview for Application ID: ${app.id} from ${slot.start} to ${slot.end}`);
+        app.interviewStart = slot.start;
+        app.interviewEnd = slot.end;
+        app.interviewSlotId = interview.id;
+        app.interviewInvitedAt = new Date();
+
+        await app.save({
+          fields: ['status', 'interview_start', 'interview_end', 'interview_slot_id', 'interview_invited_at'],
+          transaction: t
+        });
+        
+        results.push({
+          id: app.id,
+          interview_start: app.interview_start,
+          interview_end: app.interview_end,
+          applicant: app.applicant
+        });
+      }
+      return results;
+    });
+
+    const emailPromises = processedCandidates.map(async (app) => {
+      try {
+        console.log('here it is');
+        // console.log(app);
+        const applicantData = app.applicant;
+        console.log(applicantData.full_name);
+        if (!applicantData || !applicantData.email) {
+          const error = new Error(`Applicant data or email missing for Application ID: ${app.id}`);
+          error.statusCode = statusCode.BAD_REQUEST;
+          throw error;
+        }
+
+        const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const timeOptions = { hour: '2-digit', minute: '2-digit' };
+        const inviteHtml = interviewInviteTemplate({
+          name: applicantData.full_name,
+          role: jobTitle,
+          interviewDay: new Date(app.interview_start).toLocaleDateString('en-US', dateOptions),
+          startDate: new Date(app.interview_start).toLocaleTimeString('en-US', timeOptions),
+          endDate: new Date(app.interview_end).toLocaleTimeString('en-US', timeOptions),
+          meetingLink: interviewData.meeting_link
+        });
+        // console.log(applicantData.email);
+        const email = await sendEmail({
+          to: applicantData.email,
+          subject: `Interview Invitation: ${jobTitle}`,
+          html: inviteHtml
+        });
+        // console.log(email);
+
+      } catch (emailErr) {
+        console.error(`Failed to email applicant ${app.id}:`, emailErr.message);
+      }
+    });
+
+    await Promise.all(emailPromises);
+
+    return {
+      message: `Successfully scheduled ${processedCandidates.length} interviews`,
+      count: processedCandidates.length
+    };
+
+  } catch (error) {
+    // console.log(error);
+    if (!error.statusCode) error.statusCode = statusCode.INTERNAL_SERVER_ERROR;
     throw error;
   }
 };

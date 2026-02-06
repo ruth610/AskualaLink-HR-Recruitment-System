@@ -11,8 +11,7 @@ The system is built with **Node.js** and **Express.js**, focusing on modularity,
 ## System Architecture
 
 The backend follows a **Modular Monolith** architecture to ensure separation of concerns while keeping the codebase manageable for the team.
-
-```mermaid
+---
 graph TD
     Client[React Frontend] -->|REST API| API_Gateway[Express Server]
     

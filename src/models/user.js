@@ -1,5 +1,6 @@
 'use strict';
 import { Model } from 'sequelize';
+import { encrypt } from '../utils/crypto.js';
 
 const User = (sequelize, DataTypes) => {
   class User extends Model {
@@ -43,6 +44,15 @@ const User = (sequelize, DataTypes) => {
         type: DataTypes.DATE,
         allowNull: true,
       },
+        salary: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+
+      national_id: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
     },
     {
       sequelize,
@@ -50,6 +60,27 @@ const User = (sequelize, DataTypes) => {
       tableName: 'users',
       underscored: true,
       timestamps: true,
+      hooks: {
+        beforeCreate(user) {
+          if (user.salary) {
+            user.salary = encrypt(user.salary);
+          }
+
+          if (user.national_id) {
+            user.national_id = encrypt(user.national_id);
+          }
+        },
+
+        beforeUpdate(user) {
+          if (user.changed('salary')) {
+            user.salary = encrypt(user.salary);
+          }
+
+          if (user.changed('national_id')) {
+            user.national_id = encrypt(user.national_id);
+          }
+        }
+      }
     }
   );
 

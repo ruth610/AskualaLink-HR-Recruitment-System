@@ -34,14 +34,21 @@ export async function up(queryInterface, Sequelize) {
       defaultValue: 'PENDING',
     },
 
-    fit_score: {
+    initial_fit_score: {
       type: Sequelize.INTEGER,
       allowNull: true,
     },
-
+    final_fit_score: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+    },
     ai_summary: {
       type: Sequelize.TEXT,
       allowNull: true,
+    },
+    ai_status: {
+      type: Sequelize.ENUM('PENDING', 'SHORTLISTED', 'REJECTED'),
+      defaultValue: 'PENDING',
     },
     custom_field_values: {
       type: Sequelize.JSONB,
@@ -65,6 +72,7 @@ export async function up(queryInterface, Sequelize) {
     type: 'unique',
     name: 'unique_job_applicant',
   });
+
 }
 
 export async function down(queryInterface) {

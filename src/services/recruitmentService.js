@@ -1,12 +1,15 @@
 import db from '../models/index.js';
 import statusCode from 'http-status-codes';
 import { validateJobAnswers } from '../utils/dynamicValidator.js';
+import { extractResumeText } from '../utils/resumeTextExtractor.js';
+import { normalizeResume } from '../utils/textNormalize.js';
+import { sha256 } from '../utils/textHash.js';
+import { triggerApplicationScoring } from '../workers/aiTrigger.js';
 
-const { Job, Applicant, Application } = db;
+const { Job, Applicant, Application, Resume } = db;
 
 export async function createNewJob(jobData) {
     // 1. You can add extra business logic here if needed
-    // (e.g., Check if a job with this title already exists in the same department)
     const {title,department,location,type,status} = jobData;
     const existingJob = await Job.findOne({
         where: {
@@ -15,8 +18,6 @@ export async function createNewJob(jobData) {
             location: location,
             type: type,
             status: "OPEN"
-
-
         }
     });
 
@@ -57,17 +58,15 @@ export const deleteJob = async (jobId, userId, userRole) => {
         err.statusCode = 403;
         throw err;
     }
-
     // // 2. Integrity Check (Count Applicants)
-    // const applicantCount = await Application.count({ where: { job_id: jobId } });
+    const applicantCount = await Application.count({ where: { job_id: jobId } });
 
-    // if (applicantCount > 0) {
-    //     // Soft Delete: Just hide it
-    //     await job.update({ status: 'ARCHIVED' });
-    //     return { message: "Job has applicants; it was archived instead of deleted." };
-    // }
+    if (applicantCount > 0) {
+        // Soft Delete: Just hide it
+        await job.update({ status: 'ARCHIVED' });
+        return { message: "Job has applicants; it was archived instead of deleted." };
+    }
 
-    // Hard Delete: Remove from DB
     await job.destroy();
     return { message: "Job deleted successfully." };
 };
@@ -112,22 +111,57 @@ export const applyToJob = async (jobId, payload) => {
         error.statusCode = statusCode.BAD_REQUEST;
         throw error;
     }
+    // console.log(payload.resumeUrl);
+    const textResume = await extractResumeText(payload.resumeUrl);
+    // console.log(textResume);
+
+    if(!textResume){
+        const error = new Error("Could not extract text from resume");
+        error.statusCode = statusCode.BAD_REQUEST;
+        throw error;
+    }
 
     let applicant = await Applicant.findOne({
       where: { email: payload.email },
       transaction,
     });
-
-    // 2. Create applicant if not exists
     if (!applicant) {
       applicant = await Applicant.create({
         full_name: payload.full_name,
         email: payload.email,
         phone: payload.phone,
         resume_url: payload.resumeUrl,
+        resume_text: textResume,
       }, { transaction });
     }
-    //  check if the same application exists
+
+    const normalized = normalizeResume(textResume);
+    const hash = sha256(normalized);
+
+    const existing = await Resume.findOne({
+      where: { resumeHash: hash },
+      transaction,
+    });
+
+    if(existing){
+      if ( existing.applicantId !== applicant.id ) {
+        const error = new Error("Exact duplicate resume found");
+        error.statusCode = statusCode.CONFLICT;
+        throw error;
+      }
+
+    }
+    else{
+      const resume = await Resume.create(
+      {
+        resumeHash: hash,
+        rawText: textResume,
+        applicantId: applicant.id,
+      },
+      { transaction }
+      );
+    }
+
     const existingApplication = await Application.findOne({
         where: {
             job_id: jobId,
@@ -141,18 +175,23 @@ export const applyToJob = async (jobId, payload) => {
         error.statusCode = statusCode.CONFLICT;
         throw error;
     }
-
     const application = await Application.create({
       job_id: jobId,
       applicant_id: applicant.id,
       custom_field_values: payload.custom_field_values,
-    }, { transaction });
-
+      },
+      { transaction });
     await transaction.commit();
+    // Trigger AI Scoring Asynchronously
+    triggerApplicationScoring(application.id).catch(err => {
+        console.error("AI Scoring Trigger Failed:", err);
+    });
+
     return application;
 
   } catch (error) {
-    await transaction.rollback();
+    // console.log(error);
+    if(transaction) await transaction.rollback();
     throw error;
   }
 };

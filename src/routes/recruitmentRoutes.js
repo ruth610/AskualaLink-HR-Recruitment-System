@@ -40,5 +40,4 @@ router.post(
     recruitmentController.applyJob
 );
 
-
 export { router }

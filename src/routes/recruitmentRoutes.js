@@ -2,6 +2,7 @@ import express from 'express';
 import * as recruitmentController from '../controllers/recruitmentController.js';
 import  {authMiddleWare}  from '../middlewares/authMiddleware.js';
 import  {authorizeRoles}  from '../middlewares/roleMiddleware.js';
+import { uploads } from '../middlewares/uploadMiddleware.js';
 import { validateRequest } from '../middlewares/jobMiddleware.js';
 import { createJobSchema } from '../middlewares/jobMiddleware.js';
 
@@ -32,6 +33,11 @@ router.get(
     '/job-details/:id',
     authMiddleWare,
     recruitmentController.getJobDetails
+);
+router.post(
+    '/jobs/:id/apply',
+    uploads.single('resume'),
+    recruitmentController.applyJob
 );
 
 

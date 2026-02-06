@@ -34,7 +34,7 @@ graph TD
         Attendance[Secure Attendance]
     end
 
-    Recruitment --> Database[(MongoDB / SQL)]
+    Recruitment --> Database[(PostgresSQL)]
     HR_Core --> Database
 
     AI_Service -->|Analyze Resumes| OpenAI_API[External AI API]
